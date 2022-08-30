@@ -23,5 +23,18 @@ namespace SendEmailAPI.Entities
             Updates = new List<PackageUpdate>();
 
         }
+
+        public void AddUpdate(string status, bool delivered)
+        {
+            if (Delivered)
+            {
+                throw new Exception("Package is already delivered");
+            }
+
+            var update = new PackageUpdate(status, Id);
+            this.Updates.Add(update);
+            Delivered = delivered;
+            
+        }
     }
 }
