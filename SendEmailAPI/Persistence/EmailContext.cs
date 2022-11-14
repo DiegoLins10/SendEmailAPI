@@ -1,18 +1,38 @@
-﻿using SendEmailAPI.Entities;
-using System;
+﻿using Microsoft.EntityFrameworkCore;
+using SendEmailAPI.Entities;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace SendEmailAPI.Persistence
 {
-    public class EmailContext
+    public class EmailContext : DbContext
     {
-        public List<Package> Packages { get; set; }
 
-        public EmailContext()
+        public EmailContext(DbContextOptions<EmailContext> options) : base(options)
         {
-            Packages = new List<Package>();
+        }
+
+        public DbSet<Package> Packages { get; set; }
+        public DbSet<PackageUpdate> PackageUpdates { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            builder.Entity<Package>(d =>
+           {
+               //d.ToTable("tb_Package");
+               d.HasKey(p => p.Id);
+
+               // um pacote tem muitos updates relacionado com uma chave estrangeira do pacote
+               d.HasMany(p => p.Updates)
+               .WithOne()
+               .HasForeignKey(pu => pu.PackageId)
+               .OnDelete(DeleteBehavior.Restrict); //impede de deletar
+           });
+
+            builder.Entity<PackageUpdate>(d =>
+            {
+                d.HasKey(p => p.Id);
+            });
         }
     }
 }
